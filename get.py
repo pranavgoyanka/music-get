@@ -1,7 +1,7 @@
 import json
 import os
 import requests
-import tqdm
+# import tqdm
 
 class music_get:
     def __init__(self):
@@ -17,7 +17,10 @@ class music_get:
     def start(self):
         self.url = input('Enter Album URL from YT Music: ')
         self.albumName = input("Album Name: ")
+        self.albumName = self.albumName.capitalize()
         self.artistName = input("Artist Name: ")
+        self.artistName = self.artistName.capitalize()
+        self.output = '"./' + self.artistName.replace('+', ' ') + '/' + self.albumName.replace('+', ' ') + '/%(playlist_index)s.%(ext)s" ' 
         self.output = '"./' + self.artistName.replace('+', ' ') + '/' + self.albumName.replace('+', ' ') + '/%(playlist_index)s.%(ext)s" ' 
         self.yt_dl = "youtube-dl -x --audio-format mp3 --audio-quality 0 --prefer-ffmpeg  -o" + self.output
         self.lastFM = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=ebd06f4e0ef7f4affadd430237a839b1&artist="+self.artistName+"&album="+self.albumName+"&format=json"
@@ -32,6 +35,18 @@ class music_get:
             self.songs.append(i['name'])
 
     def youtube_dl(self):
+        try:
+            os.chdir('./' + self.artistName)
+            os.chdir('..')
+        except:
+            os.mkdir('./' + self.artistName)
+        
+        try:
+            os.chdir('./' + self.artistName + '/' + self.albumName)
+            os.chdir('..')
+            os.chdir('..')
+        except: 
+            os.mkdir('./' + self.artistName + '/' + self.albumName)
         os.system(self.yt_dl + self.url)
 
     def fix_names(self):
