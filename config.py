@@ -15,6 +15,7 @@ windows = input("Are you using Windows? (y/n) ")
 print('Installing python dependancies')
 install('youtube_dl')
 install('requests')
+install('termcolor')
 install('tqdm')
 
 if(windows.lower() == 'y'):
