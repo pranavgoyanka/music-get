@@ -2,9 +2,21 @@ import json
 import os
 import requests
 import tqdm
+import subprocess
+import sys
+from termcolor import colored, cprint
 
 class music_get:
     def __init__(self):
+        try: 
+            os.stat('./.config').st_size
+
+        except:
+            cprint("It seems like you are running music-get for the first time.", "yellow")
+            cprint("Running config fix.", "yellow")
+            # os.system('python ./.config.py')
+            subprocess.check_call([sys.executable, "./config.py"])
+
         self.url = ""
         self.albumName = ""
         self.artistName = ""
@@ -41,6 +53,7 @@ class music_get:
             for c in bad_chars:
                 title = title.replace(c, ';')
             title = title.replace('.', '')
+            
         # Rename files
         os.chdir('./' + self.artistName.replace('+', ' ') + '/' + self.albumName.replace('+', ' ') + '/')
         for filename in sorted(os.listdir('./')):

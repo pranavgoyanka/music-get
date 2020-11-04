@@ -3,6 +3,7 @@ import requests
 import subprocess
 import sys
 from tqdm import tqdm
+from termcolor import colored, cprint
 
 def install(package):
     subprocess.check_call([sys.executable, "-m", "pip", "install", package])
@@ -32,6 +33,10 @@ if(windows.lower() == 'y'):
     print('Done!')
 
 else:
-    print("\n\033[93m[WARNING]: Installing ffmpeg for Linux and macOS is currently not supported.")
-    print("Please install them manually if it is not installed.\n")
+    cprint("[WARNING]: Installing ffmpeg for Linux and macOS is currently not supported.", "yellow")
+    cprint("Please install them manually if it is not installed.\n", "yellow")
 
+# WRITE config
+conf = open('.config', 'w')
+conf.write('windows: ' + windows)
+conf.close()
