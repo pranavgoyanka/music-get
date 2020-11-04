@@ -63,33 +63,18 @@ class music_get:
             self.files.append(filename)
 
         for i in range(0,len(self.songs)):
-            os.rename(self.files[i], self.songs[i] + '.mp3')
-        
-    def fix_tag(self):
-        API_key = "ebd06f4e0ef7f4affadd430237a839b1"
-        url = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=" + API_key + "&artist="+self.artistName+"&album=" + self.albumName + "&format=json"
-        # Example: http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=ebd06f4e0ef7f4affadd430237a839b1&artist=Abba&album=Arrival&format=json
-        r = requests.get(url)
-        r = json.loads(r.text)
-
-        for i in r['album']['tracks']['track']:
-            data = EasyID3('./' + self.artistName + '/' + self.albumName + '/' + os.listdir('./' + self.artistName + '/' + self.albumName + '/')[int(i['@attr']['rank'])- 1])
-            # data = mutagen.File('./Song/' + os.listdir('./Song/')[int(i['@attr']['rank'])- 1] )
-            # print(data)
-            # mutagen.File('')
-            # os.rename(''./2001 - Amnesiac/' + os.listdir('./2001 - Amnesiac')[int(i['@attr']['rank'])- 1]', i['name'])
-            data['title'] = i['name']
-            data['album'] = r['album']['name']
-            data['tracknumber'] = i['@attr']['rank']
-            data['albumartist'] = r['album']['artist']
-            data['artist'] = r['album']['artist']
+            data = EasyID3(self.files[i])
+            data['title'] = self.songs[i]
+            data['album'] = self.albumName
+            data['tracknumber'] = str(i+1)
+            data['albumartist'] = self.artistName
+            data['artist'] = self.artistName
             data.save()
 
-
+            os.rename(self.files[i], self.songs[i] + '.mp3')
 
 mdl = music_get()
 mdl.start()
 mdl.metadata_fetch()
 mdl.youtube_dl()
-mdl.fix_tag()
 mdl.fix_names()
