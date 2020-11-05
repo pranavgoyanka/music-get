@@ -1,7 +1,9 @@
 import json
 import os
 import requests
-# import tqdm
+from mutagen.easyid3 import EasyID3
+from mutagen.id3 import ID3, APIC
+import urllib3
 
 class music_get:
     def __init__(self):
@@ -29,10 +31,12 @@ class music_get:
         r = requests.get(self.lastFM)
         data = json.loads(r.text)
         # tracks = data['album']['tracks']['track']
-        print("The following tracks will be downloaded:")
+        print("\nThe following tracks will be downloaded:-")
+        sno=1
         for i in data['album']['tracks']['track']:
-            print(i['name'])
+            print(str(sno) + ". " + i['name'])
             self.songs.append(i['name'])
+            sno+=1
 
     def youtube_dl(self):
         try:
@@ -50,6 +54,11 @@ class music_get:
         os.system(self.yt_dl + self.url)
 
     def fix_names(self):
+        API_key = "ebd06f4e0ef7f4affadd430237a839b1"
+        art_url = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=" + API_key + "&artist="+self.artistName+"&album=" + self.albumName + "&format=json"
+        res = requests.get(art_url)
+        res = json.loads(res.text)
+        
         # Sanitize titles
         for title in self.songs:
             bad_chars = '<>:"/\|?*'
@@ -61,16 +70,38 @@ class music_get:
         for filename in sorted(os.listdir('./')):
             self.files.append(filename)
 
+        print("\n\nAdding Album art and renaming songs....  ")
+
+        
+        http = urllib3.PoolManager()
+        albumart = http.request('GET', res['album']['image'][-2]['#text']).data
+
         for i in range(0,len(self.songs)):
+            data = EasyID3(self.files[i])
+            data['title'] = self.songs[i]
+            data['album'] = self.albumName
+            data['tracknumber'] = str(i+1)
+            data['albumartist'] = self.artistName
+            data['artist'] = self.artistName
+            data.save()
+
+            data = ID3(self.files[i])
+
+            data['APIC'] = APIC(
+                                encoding=3, # 3 is for utf-8
+                                mime='image/png', # image/jpeg or image/png
+                                type=3, # 3 is for the cover image
+                                desc=u'Cover',
+                                data=albumart
+                            )
+            data.save()
+
             os.rename(self.files[i], self.songs[i] + '.mp3')
 
+        print("\nSuccessfully downloaded album \"" + self.albumName + "\" by " + self.artistName)
 
 mdl = music_get()
 mdl.start()
 mdl.metadata_fetch()
 mdl.youtube_dl()
 mdl.fix_names()
-
-
-
-
