@@ -31,10 +31,12 @@ class music_get:
         r = requests.get(self.lastFM)
         data = json.loads(r.text)
         # tracks = data['album']['tracks']['track']
-        print("The following tracks will be downloaded:")
+        print("\nThe following tracks will be downloaded:-")
+        sno=1
         for i in data['album']['tracks']['track']:
-            print(i['name'])
+            print(str(sno) + ". " + i['name'])
             self.songs.append(i['name'])
+            sno+=1
 
     def youtube_dl(self):
         try:
@@ -53,8 +55,8 @@ class music_get:
 
     def fix_names(self):
         API_key = "ebd06f4e0ef7f4affadd430237a839b1"
-        url = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=" + API_key + "&artist="+self.artistName+"&album=" + self.albumName + "&format=json"
-        res = requests.get(url)
+        art_url = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=" + API_key + "&artist="+self.artistName+"&album=" + self.albumName + "&format=json"
+        res = requests.get(art_url)
         res = json.loads(res.text)
         
         # Sanitize titles
@@ -64,9 +66,15 @@ class music_get:
                 title = title.replace(c, ';')
             title = title.replace('.', '')
         # Rename files
-        os.chdir('./' + self.artistName.replace('+', ' ') + '/' + self.albumName.replace('+',   ' ') + '/')
+        os.chdir('./' + self.artistName.replace('+', ' ') + '/' + self.albumName.replace('+', ' ') + '/')
         for filename in sorted(os.listdir('./')):
             self.files.append(filename)
+
+        print("\n\nAdding Album art and renaming songs....  ")
+
+        
+        http = urllib3.PoolManager()
+        albumart = http.request('GET', res['album']['image'][-2]['#text']).data
 
         for i in range(0,len(self.songs)):
             data = EasyID3(self.files[i])
@@ -79,25 +87,18 @@ class music_get:
 
             data = ID3(self.files[i])
 
-            # albumart = urllib2.urlopen(res['album']['image'][-2]['#text'])
-            http = urllib3.PoolManager()
-            albumart = http.request('GET', res['album']['image'][-2]['#text'])
-
-            with open('../../aabb.png', 'rb') as art:
-                # print("\nAdding Album Art\n")
-                data['APIC'] = APIC(
-                                    encoding=3, # 3 is for utf-8
-                                    mime='image/png', # image/jpeg or image/png
-                                    type=3, # 3 is for the cover image
-                                    desc=u'Cover',
-                                    data=art.read()
-                                )
-                # print("\nAlbum Art Added\n")
-            
-            albumart.close()
+            data['APIC'] = APIC(
+                                encoding=3, # 3 is for utf-8
+                                mime='image/png', # image/jpeg or image/png
+                                type=3, # 3 is for the cover image
+                                desc=u'Cover',
+                                data=albumart
+                            )
             data.save()
 
             os.rename(self.files[i], self.songs[i] + '.mp3')
+
+        print("\nSuccessfully downloaded album \"" + self.albumName + "\" by " + self.artistName)
 
 mdl = music_get()
 mdl.start()
