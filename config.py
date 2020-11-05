@@ -3,14 +3,15 @@ import requests
 import subprocess
 import sys
 from tqdm import tqdm
+import json
 from termcolor import colored, cprint
+import platform
+import zipfile
 
 def install(package):
     subprocess.check_call([sys.executable, "-m", "pip", "install", package])
 
 os.system('cat ./banner')
-
-windows = input("Are you using Windows? (y/n) ")
 
 print('Installing python dependancies')
 install('youtube_dl')
@@ -18,26 +19,36 @@ install('requests')
 install('termcolor')
 install('tqdm')
 
-if(windows.lower() == 'y'):
-    print('Fetching ffmpeg')
-    r = requests.get('https://srv-store1.gofile.io/download/GytNuJ/ffmpeg.exe', stream=True)
-    size = int(r.headers.get('content-length'))
-    block_size = 1024 #1 Kibibyte
-    progress_bar = tqdm(total=size, unit='iB', unit_scale=True)
-    with open('ffmpeg.exe', 'wb') as file:
-        for data in r.iter_content(block_size):
-            progress_bar.update(len(data))
-            file.write(data)
-    progress_bar.close()
-    if size != 0 and progress_bar.n != size:
-        print("ERROR, something went wrong")
-    print('Done!')
+ff = requests.get("https://ffbinaries.com/api/v1/version/latest")
+ff = json.loads(ff.text)
+
+if(platform.system() == "Linux"):
+    ffmpeg = ff['bin']['linux-64']['ffmpeg']
+elif(platform.system() == "Windows"):
+    ffmpeg = ff['bin']['windows-64']['ffmpeg']
 
 else:
-    cprint("[WARNING]: Installing ffmpeg for Linux and macOS is currently not supported.", "yellow")
-    cprint("Please install them manually if it is not installed.\n", "yellow")
+    ffmpeg = ff['bin']['osx-64']['ffmpeg']
+
+print('Fetching ffmpeg for ' + str(platform.system()))
+
+r = requests.get(ffmpeg, stream=True)
+size = int(r.headers.get('content-length'))
+block_size = 1024 #1 Kibibyte
+progress_bar = tqdm(total=size, unit='iB', unit_scale=True)
+with open('ffmpeg.zip', 'wb') as file:
+    for data in r.iter_content(block_size):
+        progress_bar.update(len(data))
+        file.write(data)
+progress_bar.close()
+if size != 0 and progress_bar.n != size:
+    print("ERROR, something went wrong")
+print('Done!')
+
+with zipfile.ZipFile('ffmpeg.zip', 'r') as zip_ref:
+    zip_ref.extractall('./')
 
 # WRITE config
 conf = open('.config', 'w')
-conf.write('windows: ' + windows)
+conf.write('platform: ' + str(platform.system()))
 conf.close()
