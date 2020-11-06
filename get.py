@@ -32,9 +32,9 @@ class music_get:
     def start(self):
         self.url = input('Enter Album URL from YT Music: ')
         self.albumName = input("Album Name: ")
-        self.albumName = self.albumName.capitalize()
+        self.albumName = self.albumName.title()
         self.artistName = input("Artist Name: ")
-        self.artistName = self.artistName.capitalize()
+        self.artistName = self.artistName.title()
         self.output = '"./' + self.artistName.replace('+', ' ') + '/' + self.albumName.replace('+', ' ') + '/%(playlist_index)s.%(ext)s" ' 
         self.output = '"./' + self.artistName.replace('+', ' ') + '/' + self.albumName.replace('+', ' ') + '/%(playlist_index)s.%(ext)s" ' 
         self.yt_dl = "youtube-dl -x --audio-format mp3 --audio-quality 0 --prefer-ffmpeg  -o" + self.output
