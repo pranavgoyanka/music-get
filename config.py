@@ -18,6 +18,7 @@ install('youtube_dl')
 install('requests')
 install('termcolor')
 install('tqdm')
+install('mutagen')
 
 ff = requests.get("https://ffbinaries.com/api/v1/version/latest")
 ff = json.loads(ff.text)
