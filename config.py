@@ -8,17 +8,17 @@ from termcolor import colored, cprint
 import platform
 import zipfile
 
-def install(package):
-    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+# def install(package):
+#     subprocess.check_call([sys.executable, "-m", "pip", "install", package])
 
 os.system('cat ./banner')
 
-print('Installing python dependancies')
-install('youtube_dl')
-install('requests')
-install('termcolor')
-install('tqdm')
-install('mutagen')
+# print('Installing python dependancies')
+# install('youtube_dl')
+# install('requests')
+# install('termcolor')
+# install('tqdm')
+# install('mutagen')
 
 ff = requests.get("https://ffbinaries.com/api/v1/version/latest")
 ff = json.loads(ff.text)
