@@ -32,12 +32,10 @@ class music_get:
     def start(self):
         self.url = input('Enter Album URL from YT Music: ')
         self.albumName = input("Album Name: ")
-        self.albumName = self.albumName.title()
+        # self.albumName = self.albumName.title()
         self.artistName = input("Artist Name: ")
-        self.artistName = self.artistName.title()
-        self.output = '"./' + self.artistName.replace('+', ' ') + '/' + self.albumName.replace('+', ' ') + '/%(playlist_index)s.%(ext)s" ' 
-        self.output = '"./' + self.artistName.replace('+', ' ') + '/' + self.albumName.replace('+', ' ') + '/%(playlist_index)s.%(ext)s" ' 
-        self.yt_dl = "youtube-dl -x --audio-format mp3 --audio-quality 0 --prefer-ffmpeg  -o" + self.output
+        # self.artistName = self.artistName.title()
+        # self.output = '"./' + self.artistName.replace('+', ' ') + '/' + self.albumName.replace('+', ' ') + '/%(playlist_index)s.%(ext)s" ' 
         self.lastFM = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=ebd06f4e0ef7f4affadd430237a839b1&artist="+self.artistName+"&album="+self.albumName+"&format=json"
 
     def metadata_fetch(self):
@@ -50,8 +48,13 @@ class music_get:
             print(str(sno) + ". " + i['name'])
             self.songs.append(i['name'])
             sno+=1
+        self.albumName = data['album']['name']
+        self.artistName = data['album']['artist']
+
 
     def youtube_dl(self):
+        self.output = '"./' + self.artistName + '/' + self.albumName + '/%(playlist_index)s.%(ext)s" ' 
+        self.yt_dl = "youtube-dl -x --audio-format mp3 --audio-quality 0 --prefer-ffmpeg  -o" + self.output
         try:
             os.chdir('./' + self.artistName)
             os.chdir('..')
