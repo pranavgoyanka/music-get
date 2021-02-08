@@ -11,7 +11,7 @@ Download music
 
 1. Install all the dependencies with
 
-    ``` python2 install.py ```
+    ``` python3 install.py ```
 
 2. Run the script with 
 
